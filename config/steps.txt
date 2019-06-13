@@ -1,0 +1,135 @@
+New folder for project 
+1. Install everything
+    1. npm Install  
+        1. init 
+        2. ejs 
+        3. express 
+        4. body-parser 
+        5. sequelize 
+        6. pg 
+        7. pg-hstore 
+    2. sequelize init in main folder 
+3. go to config.json delete the bottom two objects 
+4. Create your database createdb name
+5. create your tables through bash
+    1. sequelize model:generate --name dishes --attributes \
+        title:string,description:string,price:integer,course:string,imageURL:string
+        sequelize model:generate --name categories --attributes title:string
+6. Go to your models folder and kind of tie them together by initiating a setup for a reference key 
+    1. Go to the categories.js 
+        1.Under associations add this:
+            a. models.categories.hasMany(models.dishes)
+    3. Then go to dishes.js 
+        1. Under associations add this:
+            a. models.dishes.belongsTo(models.categories);
+7. Adding rows to a table 
+    1. run sequelize seed:generate --name categories
+    1. Go to seeders folder 
+    2. categories.js 
+    3. return queryInterface.bulkInsert('categories, [{
+        title: 'chinese',
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }]
+    4. run sequelize db:seed:all
+8. --THEN ON TO THE REST OF THE APP--
+9. Create app.js
+10. Setup your app.js:
+    let express = require('express');
+    let app = express();
+
+    app.listen port...
+11. Create your folders 
+    1. Views
+    2. Routes 
+    3. Public 
+12. Back to your app.js and create your pubilc folder:
+    1. app.use(express.static('public'))
+12. Setup your Views
+    1. app.set('view engine', 'ejs')
+    2. app.set('views', 'views')
+13. Add your routes 
+    1. app.use(require('./routes/index'))
+    2. Then for /newdish 
+    3. then for /dishes 
+14. Go ahead and create your routes files 
+15. Setup each routes file 
+    1. require express 
+    2. router = express.Router();
+    3. router.get('/', (req, res)=>{
+        res.send('homepage')
+    })
+    4. module.exports=router; 
+    5. This will be the same for your other routes except different '/'
+16. create newdish.ejs 
+    1. create a form 
+    2. action posts back to "/dishes" 
+        a. when the user submit it'll go back to the dishes page 
+    3. method is POST 
+    4. add inputs and make sure each of them has a name 
+    5. make sure price type is number with default value of 0 
+17. Go to newdish.js route 
+    1. inside router.get 
+        a. Put in router.render('newdish')
+        b. which finds your ejs file 
+18. Go to dishes.js route 
+    1. After the router.get 
+    2. Add router.post
+        a. this creates a new record in database
+    3. Create a new variable to acquire your models 
+        a. let db = require('../models');
+    4. Add bodyparser 
+        a. let bodyParser = require('body-parser');
+        b. Right above the post add the body-parser documentation
+        c. router.use(bodyParser.urlencoded({extended: false}))
+    5. Inside router.post 
+        a. let title = req.body.title; 
+        b. let price = parseInt(req.body.price);
+        c. Do this for the rest of the inputs 
+        d. db.dishes.create({title:title, description:description, price:price...})
+            a. Finish the rest of the db 
+            b. It's a promise so we can chain on a callback function 
+                c. .then((result)=>{
+
+                    db.dishes.findAll() **GATHERS OR FINDS ALL OF THE DISHES IN THE DATABASE
+                    .then((records)=>{
+                        res.render('dishes', {
+                            dishes:records **THIS TAKES ALL THE RECORD FROM THE DATABASE SO WE CAN USE IN THE DISHES EJS FILE
+                        })
+                    })
+                    .catch((error)=>{
+                        res.send('there was an error')
+                    })
+                })
+userId: {
+type: Sequelize.INTEGER,
+references: {
+    model: 'users',
+    key: 'id'
+},
+allowNull: true
+}
+19. Create a dishes.ejs in the views folder 
+    1. To display the record from the dishes.js 
+    2. dishes.forEach(record =>{
+       <h1> record.title </h1>
+    })
+    3. don't forget the <% %> for the javascript lines and variables 
+20. !!!PROBLEM DURING CLASS!!!
+    1. unable to retreive the data we added through new dishes form
+    2. created another migrations file 
+        a. sequelize migration:create --name categoryID 
+    3. Under up 
+        a. return queryInterface.renameColumn(
+                'dishes',
+                'categoriesId',
+                'categoryId'
+            )
+21. In dishes.js 
+    1. Copy all of Step 18.5.d.b.c inside of the first .then result 
+    2. Paste it to the router.get('/dishes')
+    3. inside findAll()
+    
+
+        
+
